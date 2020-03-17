@@ -7,9 +7,15 @@ ipl.bin: ipl.nas
 helloos.img: ipl.bin
 	mformat -f 1440 -C -B ipl.bin -i helloos.img ::
 
+.PHONY: img
 img:
 	make -r helloos.img
 
-run :
+.PHONY: run
+run:
 	make img
 	$(QEMU) $(QEMU_ARGS)
+
+.PHONY: clean
+clean:
+	rm ipl.bin ipl.lst helloos.img

@@ -1,7 +1,10 @@
 ; hello-os
 
+  ORG 0x7c00              ; Boot sector is loaded from this address
+
 ; Description for normal AT12 format floppy disk
-  DB 0xeb, 0x4e, 0x90
+  JMP SHORT entry
+  DB 0x90
   DB "HelloIPL"           ; Boot sector name (must be 8byte)
   DW 512                  ; 1sector size (must be 512)
   DB 1                    ; Cluster size (must be 1sector)
@@ -22,13 +25,28 @@
   TIMES 18 DB 0
 
 ; Executed program
-  DB 0xb8, 0x00, 0x00, 0x8e, 0xd0, 0xbc, 0x00, 0x7c
-  DB 0x8e, 0xd8, 0x8e, 0xc0, 0xbe, 0x74, 0x7c, 0x8a
-  DB 0x04, 0x83, 0xc6, 0x01, 0x3c, 0x00, 0x74, 0x09
-  DB 0xb4, 0x0e, 0xbb, 0x0f, 0x00, 0xcd, 0x10, 0xeb
-  DB 0xee, 0xf4, 0xeb, 0xfd
+entry:
+  MOV AX,0                ; Initialize register
+  MOV SS,AX
+  MOV SP,0x7c00
+  MOV ES,AX
+
+  MOV SI,msg
+putloop:
+  MOV AL,[SI]
+  ADD SI,1
+  CMP AL,0
+  JE fin
+  MOV AH,0x0e             ; Display char (specify BIOS function)
+  MOV BX,15               ; Color code
+  INT 0x10                ; Call video BIOS
+  JMP putloop
+fin:
+  HLT
+  JMP fin
 
 ; Message data
+msg:
   DB 0x0a, 0x0a           ; Newline character
   DB "hello, sykwer"
   DB 0x0a

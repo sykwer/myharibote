@@ -38,12 +38,22 @@ entry:
   MOV CH,0                ; [Cylinder number] & 0xff
   MOV DH,0                ; Head number
   MOV CL,2                ; [Sector number(bit0-5)] | [Cylinder number & 0x300] >> 2
+  MOV SI,0                ; Failure counter
+
+retry:
   MOV AH,0x02             ; Read floppy/hard disk in CHS mode (specify BIOS function)
   MOV AL,1                ; The number of sectors to be processed
   MOV BX,0                ; Buffer address [ES:BX] (ES * 16 + BX)
   MOV DL,0x00             ; Drive number (`A` drive)
   INT 0x13                ; Call disk BIOS
-  JC error
+  JNC fin
+  ADD SI,1
+  CMP SI,5
+  JAE error
+  MOV AH,0x00             ; Reset floppy/hard disk
+  MOV DL,0x00
+  INT 0x13
+  JMP retry
 
 fin:
   HLT

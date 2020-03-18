@@ -1,4 +1,4 @@
-; hello-os
+; Initial program loader
 
   CYLS EQU 10
   ORG 0x7c00              ; Boot sector is loaded from this address
@@ -73,6 +73,7 @@ next:
   ADD CH,1
   CMP CH,CYLS
   JB readloop
+  JMP 0xc200              ; 0x8000(Boot sector top) + 0x4200(Saved file contents' offset)
 
 fin:
   HLT

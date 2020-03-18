@@ -38,6 +38,8 @@ entry:
   MOV CH,0                ; [Cylinder number] & 0xff
   MOV DH,0                ; Head number
   MOV CL,2                ; [Sector number(bit0-5)] | [Cylinder number & 0x300] >> 2
+
+readloop:
   MOV SI,0                ; Failure counter
 
 retry:
@@ -46,7 +48,7 @@ retry:
   MOV BX,0                ; Buffer address [ES:BX] (ES * 16 + BX)
   MOV DL,0x00             ; Drive number (`A` drive)
   INT 0x13                ; Call disk BIOS
-  JNC fin
+  JNC next
   ADD SI,1
   CMP SI,5
   JAE error
@@ -54,6 +56,14 @@ retry:
   MOV DL,0x00
   INT 0x13
   JMP retry
+
+next:
+  MOV AX,ES
+  ADD AX,0x0020           ; 0x0020 = 512 / 16
+  MOV ES,AX
+  ADD CL,1
+  CMP CL,18
+  JBE readloop
 
 fin:
   HLT

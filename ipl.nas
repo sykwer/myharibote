@@ -26,12 +26,32 @@
 
 ; Executed program
 entry:
-  MOV AX,0                ; Initialize register
+  ; Initialize register
+  MOV AX,0
   MOV SS,AX
   MOV SP,0x7c00
-  MOV ES,AX
+  MOV DS,AX
 
+  ; Read disk
+  MOV AX,0x0820
+  MOV ES,AX               ; Buffer address [ES:BX] (ES * 16 + BX)
+  MOV CH,0                ; [Cylinder number] & 0xff
+  MOV DH,0                ; Head number
+  MOV CL,2                ; [Sector number(bit0-5)] | [Cylinder number & 0x300] >> 2
+  MOV AH,0x02             ; Read floppy/hard disk in CHS mode (specify BIOS function)
+  MOV AL,1                ; The number of sectors to be processed
+  MOV BX,0                ; Buffer address [ES:BX] (ES * 16 + BX)
+  MOV DL,0x00             ; Drive number (`A` drive)
+  INT 0x13                ; Call disk BIOS
+  JC error
+
+fin:
+  HLT
+  JMP fin
+
+error:
   MOV SI,msg
+
 putloop:
   MOV AL,[SI]
   ADD SI,1
@@ -41,14 +61,11 @@ putloop:
   MOV BX,15               ; Color code
   INT 0x10                ; Call video BIOS
   JMP putloop
-fin:
-  HLT
-  JMP fin
 
-; Message data
+; Error message
 msg:
   DB 0x0a, 0x0a           ; Newline character
-  DB "hello, sykwer"
+  DB "load error"
   DB 0x0a
   DB 0
   TIMES 0x1fe-($-$$) DB 0 ; Fill 0x00 until 0x001fe

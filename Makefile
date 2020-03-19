@@ -10,8 +10,11 @@ ipl10.bin: ipl10.nas
 asmhead.bin: asmhead.nas
 	nasm asmhead.nas -o asmhead.bin -l asmhead.lst
 
-haribote.sys: asmhead.bin
-	cat asmhead.bin > haribote.sys
+bootpack.hrb: bootpack.c hrb.ld
+	i386-elf-gcc -march=i486 -m32 -nostdlib -T hrb.ld bootpack.c -o bootpack.hrb
+
+haribote.sys: asmhead.bin bootpack.hrb
+	cat asmhead.bin bootpack.hrb > haribote.sys
 
 haribote.img: ipl10.bin haribote.sys
 	mformat -f 1440 -C -B ipl10.bin -i haribote.img ::
@@ -28,4 +31,4 @@ run:
 
 .PHONY: clean
 clean:
-	rm ipl10.bin ipl10.lst asmhead.bin asmhead.lst haribote.sys haribote.img
+	rm *.bin *.lst *.sys *.hrb

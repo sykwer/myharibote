@@ -2,5 +2,6 @@ ipl10.bin
 ipl10.lst
 asmhead.bin
 asmhead.lst
+bootpack.hrb
 haribote.sys
 haribote.img

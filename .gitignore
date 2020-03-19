@@ -3,5 +3,7 @@ ipl10.lst
 asmhead.bin
 asmhead.lst
 bootpack.hrb
+nasmfunc.o
+nasmfunc.lst
 haribote.sys
 haribote.img

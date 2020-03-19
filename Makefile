@@ -10,8 +10,11 @@ ipl10.bin: ipl10.nas
 asmhead.bin: asmhead.nas
 	nasm asmhead.nas -o asmhead.bin -l asmhead.lst
 
-bootpack.hrb: bootpack.c hrb.ld
-	i386-elf-gcc -march=i486 -m32 -nostdlib -T hrb.ld bootpack.c -o bootpack.hrb
+nasmfunc.o: nasmfunc.nas
+	nasm -g -f elf nasmfunc.nas -o nasmfunc.o -l nasmfunc.lst
+
+bootpack.hrb: bootpack.c hrb.ld nasmfunc.o
+	i386-elf-gcc -march=i486 -m32 -nostdlib -T hrb.ld -g bootpack.c nasmfunc.o -o bootpack.hrb
 
 haribote.sys: asmhead.bin bootpack.hrb
 	cat asmhead.bin bootpack.hrb > haribote.sys
@@ -31,4 +34,4 @@ run:
 
 .PHONY: clean
 clean:
-	rm *.bin *.lst *.sys *.hrb
+	rm *.bin *.lst *.sys *.hrb *.o
